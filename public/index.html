@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>体験教室 予約フォーム</title>
+    <style>
+        body { font-family: sans-serif; max-width: 500px; margin: 20px auto; padding: 20px; }
+        div { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #007bff; color: white; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h2>体験教室 予約フォーム</h2>
+    <form id="reservationForm">
+        <div><label>保護者氏名</label><input type="text" name="parentName" required></div>
+        <div><label>お子様氏名</label><input type="text" name="childName" required></div>
+        <div><label>住所</label><input type="text" name="address" required></div>
+        <div><label>電話番号</label><input type="tel" name="phoneNumber" required></div>
+        <div><label>生年月日</label><input type="date" name="birthDate" required></div>
+        <div>
+            <label>学年</label>
+            <select name="grade" required>
+                <option value="">選択してください</option>
+                <option value="小1">小学1年生</option>
+                <option value="小2">小学2年生</option>
+                <option value="小3">小学3年生</option>
+                <option value="小4">小学4年生</option>
+                <option value="小5">小学5年生</option>
+                <option value="小6">小学6年生</option>
+            </select>
+        </div>
+        <button type="submit">予約する</button>
+    </form>
+
+    <script>
+        document.getElementById('reservationForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+
+            const response = await fetch('/api/reserve', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                alert('予約が完了しました！');
+                e.target.reset();
+            } else {
+                alert('送信に失敗しました。');
+            }
+        };
+    </script>
+</body>
+</html>
+
