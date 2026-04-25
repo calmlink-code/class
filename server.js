@@ -41,6 +41,34 @@ app.post('/api/reserve', async (req, res) => {
   }
 });
 
+// 1. スキーマに予約日の項目を追加
+const reservationSchema = new mongoose.Schema({
+    // ...これまでの項目
+    reservationDate: String, // "2026-04-25" のような形式
+});
+
+// 2. 人数チェック用APIの作成
+app.get('/api/check-date', async (req, res) => {
+    const { date } = req.query;
+    try {
+        // その日の予約件数をカウントする
+        const count = await Reservation.countDocuments({ reservationDate: date });
+        res.json({ count });
+    } catch (error) {
+        res.status(500).json({ error: "カウント失敗" });
+    }
+});
+
+// 3. 予約保存時にも「4人以下」か再チェックする（念のため）
+app.post('/api/reservations', async (req, res) => {
+    const { reservationDate } = req.body;
+    const count = await Reservation.countDocuments({ reservationDate });
+    if (count >= 4) {
+        return res.status(400).json({ message: "この日は既に満員です" });
+    }
+    // ...保存処理へ
+});
+
 // 管理者用のデータ取得API (GitHub Pagesから呼び出す)
 app.get('/api/admin/reservations', async (req, res) => {
   try {
