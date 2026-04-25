@@ -146,7 +146,7 @@ button:hover {
 
     try {
         // Renderのサーバーに、その日の予約人数を問い合わせる
-        const response = await fetch(`https://あなたのアプリ名.onrender.com/api/check-date?date=${date}`);
+        const response = await fetch(`https://class-v5sk.onrender.com/api/check-date?date=${date}`);
         const data = await response.json();
         
         const count = data.count;
