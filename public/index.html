@@ -4,11 +4,89 @@
     <meta charset="UTF-8">
     <title>体験教室 予約フォーム</title>
     <style>
-        body { font-family: sans-serif; max-width: 500px; margin: 20px auto; padding: 20px; }
-        div { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; }
-        input, select { width: 100%; padding: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background: #007bff; color: white; border: none; cursor: pointer; }
+:root {
+    --primary-color: #4a90e2;
+    --success-color: #2ecc71;
+    --danger-color: #e74c3c;
+    --bg-color: #f5f7fa;
+}
+
+body {
+    font-family: 'Helvetica Neue', Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", sans-serif;
+    background-color: var(--bg-color);
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 600px;
+    margin: 40px auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+h2 {
+    text-align: center;
+    color: var(--primary-color);
+    margin-bottom: 30px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+input, select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+
+/* カレンダー部分のデザイン */
+.calendar-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #eef2f7;
+    padding: 10px 15px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    color: #fff;
+}
+
+.status-ok { background: var(--success-color); }
+.status-full { background: var(--danger-color); }
+
+button {
+    width: 100%;
+    padding: 15px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background: #357abd;
+}
     </style>
 </head>
 <body>
@@ -32,6 +110,14 @@
             </select>
         </div>
         <button type="submit">予約する</button>
+        <div class="form-group">
+    <label>予約日を選択</label>
+    <div class="calendar-info">
+        <span id="selected-date-status">日付を選択してください</span>
+        <span id="remaining-count" class="status-badge" style="display:none;"></span>
+    </div>
+    <input type="date" id="reservationDate" name="reservationDate" required onchange="checkAvailability(this.value)">
+</div>
     </form>
 
     <script>
@@ -53,6 +139,36 @@
                 alert('送信に失敗しました。');
             }
         };
+        async function checkAvailability(date) {
+    const statusText = document.getElementById('selected-date-status');
+    const badge = document.getElementById('remaining-count');
+    const submitBtn = document.getElementById('submitBtn');
+
+    try {
+        // Renderのサーバーに、その日の予約人数を問い合わせる
+        const response = await fetch(`https://あなたのアプリ名.onrender.com/api/check-date?date=${date}`);
+        const data = await response.json();
+        
+        const count = data.count;
+        const remaining = 4 - count;
+
+        if (remaining > 0) {
+            statusText.innerText = `この日はあと ${remaining} 名予約可能です`;
+            badge.innerText = "空きあり";
+            badge.className = "status-badge status-ok";
+            badge.style.display = "inline";
+            submitBtn.disabled = false;
+        } else {
+            statusText.innerText = `申し訳ありません、この日は満員です`;
+            badge.innerText = "満員";
+            badge.className = "status-badge status-full";
+            badge.style.display = "inline";
+            submitBtn.disabled = true; // ボタンを押せなくする
+        }
+    } catch (error) {
+        console.error("人数チェックに失敗しました", error);
+    }
+}
     </script>
 </body>
 </html>
